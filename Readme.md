@@ -51,9 +51,11 @@ I've shamelessly lifted his code and included it as the base class for the Patre
 
 ### Changelog
 
-0.1 
+###### 0.1 
  * Initial Commit
-0.2
+ 
+###### 0.2
  * Changed to OOP architecture
-0.2.1
+ 
+###### 0.2.1
  * Updated readme, and moved cachePath to a static property
