@@ -62,7 +62,7 @@ class Feed extends PatreonRSS
     /**
      * @var string
      */
-    protected $cachePath = '/tmp';
+    protected static $cachePath = '/tmp';
 
     /**
      * @var string
@@ -272,16 +272,16 @@ class Feed extends PatreonRSS
         $now = time();
         if (!self::$useCache) {
             throw new \Exception("Cache is not active");
-        } elseif (!file_exists("{$this->cachePath}/{$this->cacheFile}")) {
+        } elseif (!file_exists(self::$cachePath . "/{$this->cacheFile}")) {
             throw new \Exception("Cache file does not exist");
-        } elseif (($now - filemtime("{$this->cachePath}/{$this->cacheFile}")) > $this->cacheExpires) {
+        } elseif (($now - filemtime(self::$cachePath . "/{$this->cacheFile}")) > $this->cacheExpires) {
             throw new \Exception("Cache has expired");
         }
         $this->user = new User();
         $this->campaign = new Campaign();
         $this->posts = array();
 
-        $input = json_decode(file_get_contents("{$this->cachePath}/{$this->cacheFile}"), true);
+        $input = json_decode(file_get_contents(self::$cachePath . "/{$this->cacheFile}"), true);
         $this->creator = $input['creator'];
         $this->creatorID = $input['creatorID'];
         $this->user->load($input['user']);
@@ -302,7 +302,7 @@ class Feed extends PatreonRSS
             return $this;
         }
         $output = $this->toArray();
-        file_put_contents("{$this->cachePath}/{$this->cacheFile}", json_encode($output, JSON_PRETTY_PRINT));
+        file_put_contents(self::$cachePath . "/{$this->cacheFile}", json_encode($output, JSON_PRETTY_PRINT));
         return $this;
 
     }
@@ -320,10 +320,9 @@ class Feed extends PatreonRSS
      * @param string $cachePath
      * @return $this
      */
-    public function setCachePath($cachePath)
+    public static function setCachePath($cachePath)
     {
-        $this->cachePath = $cachePath;
-        return $this;
+        self::$cachePath = $cachePath;
     }
 
     /**
