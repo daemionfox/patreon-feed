@@ -1,0 +1,23 @@
+{
+  "name": "daemionfox/patreon-feed",
+  "description": "Creates an RSS style feed from a user's Patreon posts page",
+  "license": "mit",
+  "authors": [
+    {
+      "name": "Matt Sowers",
+      "email": "matt@rcsipublishing.com"
+    }
+  ],
+  "minimum-stability": "dev",
+  "require": {
+    "openlss/lib-array2xml": "~0"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "4.7.x-dev"
+  },
+  "autoload": {
+    "psr-4": {
+      "daemionfox\\": "src/"
+    }
+  }
+}
