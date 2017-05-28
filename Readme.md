@@ -1,7 +1,7 @@
-patreon-feed
+Patreon feed
 ============
 
-3rd party library to pull posts from a creator's patreon feed and generate an RSS file.
+3rd party library to pull posts from a creator's Patreon feed and generate an RSS file.
 
 Usage
 ----
