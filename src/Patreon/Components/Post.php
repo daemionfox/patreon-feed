@@ -141,9 +141,31 @@ class Post extends AbstractComponent
     /**
      * @return mixed
      */
+    public function getImageUrl()
+    {
+        $image = $this->image;
+        $url = isset($image['url']) ? urldecode($image['url']) : null;
+        return $url;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getImageLargeUrl()
+    {
+        $image = $this->image;
+        $url = isset($image['large_url']) ? urldecode($image['large_url']) : null;
+        return $url;
+    }
+
+    /**
+     * @return mixed
+     */
     public function getThumbnailUrl()
     {
-        return $this->thumbnail_url;
+        $image = $this->image;
+        $url = isset($image['thumb_url']) ? urldecode($image['thumb_url']) : null;
+        return $url;
     }
 
     /**
