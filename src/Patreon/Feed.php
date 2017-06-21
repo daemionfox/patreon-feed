@@ -129,10 +129,12 @@ class Feed extends PatreonRSS
     public function findCreatorID($user)
     {
         $url = self::PATREON_BASE . "/{$user}/" . self::PATREON_POST;
-        $string = file_get_contents($url);
+        $string = @file_get_contents($url);
         $pattern = '/\s*"creator_id":\s*([0-9]+)\s*/';
-        if (false !== preg_match($pattern, $string, $matches)) {
-            return $matches[1];
+        if ($string !== false && false !== preg_match($pattern, $string, $matches)) {
+            if (isset($matches[1])) {
+                return $matches[1];
+            }
         }
         throw new \Exception("Could not find the creator id");
     }
