@@ -130,6 +130,9 @@ class Feed extends PatreonRSS
     {
         $url = self::PATREON_BASE . "/{$user}/" . self::PATREON_POST;
         $string = @file_get_contents($url);
+        if(empty($string)) {
+            throw new \Exception("Could not find the creator id");
+        }
         $pattern = '/\s*"creator_id":\s*([0-9]+)\s*/';
         if ($string !== false && false !== preg_match($pattern, $string, $matches)) {
             if (isset($matches[1])) {
