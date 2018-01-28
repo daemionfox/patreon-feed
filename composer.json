@@ -1,7 +1,7 @@
 {
   "name": "daemionfox/patreon-feed",
   "description": "Creates an RSS style feed from a user's Patreon posts page",
-  "license": "mit",
+  "license": "MIT",
   "authors": [
     {
       "name": "Matt Sowers",
