@@ -282,7 +282,7 @@ class PatreonRSS
             if(substr($header, 0, $prefix_len) === $prefix)
             {
                 $this->setSessionId(substr($header, $prefix_len, strpos($header, ";") - $prefix_len));
-                break;
+                return $this->session_id;
             }
         }
 
