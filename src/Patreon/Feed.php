@@ -103,6 +103,11 @@ class Feed extends PatreonRSS
         }
     }
 
+    public function setSessionId($session_id)
+    {
+        $this->session_id=$session_id;
+    }
+
     /**
      * @param $field
      * @return $this

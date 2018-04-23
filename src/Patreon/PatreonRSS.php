@@ -68,6 +68,9 @@ class PatreonRSS
         // 'contains_exclusive_posts'
     );
 
+    /** @var string|null which contains the session key for this user, if available, otherwise null. */
+    protected $session_id = null;
+
     /**
      * PatreonRSS constructor.
      * @param string $id
@@ -170,7 +173,7 @@ class PatreonRSS
     public function getData()
     {
         $url = $this->getURL();
-        $json = file_get_contents($url);
+        $json = $this->getStream($url);
         $data = json_decode($json, true);
 
         $clean = array(
@@ -194,6 +197,35 @@ class PatreonRSS
         }
 
         return $clean;
+    }
+
+    /**
+     * Obtains the stream JSON
+     * @return string
+     */
+    private function getStream($url)
+    {
+        if($this->session_id == null) // No session key, no cookies required
+        {
+            return file_get_contents($url);
+        } else {
+
+            $opts = array('http' =>
+                array(
+                    'header'  => array(
+                        "Cookie: session_id={$this->session_id}"
+                    )
+                )
+            );
+
+            $context = stream_context_create($opts);
+            $handle = fopen($url, "rb", false, $context);
+
+            $contents = stream_get_contents($handle);
+            fclose($handle);
+
+            return $contents;
+        }
     }
 
     /**
