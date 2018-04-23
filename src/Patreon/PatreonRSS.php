@@ -234,6 +234,61 @@ class PatreonRSS
     }
 
     /**
+     * Log-In to Patreon to obtain session key
+     * @param $mail string
+     * @param $pass string
+     * @return string|null the session key or null if no credentials have been provided.
+     */
+    public function login($mail, $pass) {
+
+        $postdata = json_encode(
+            array(
+                'data' => array(
+                    'type' => 'user',
+                    'attributes' => array(
+                        'email' => $mail,
+                        'password' => $pass
+                    )
+                )
+            )
+        );
+
+        $opts = array('http' =>
+            array(
+                'method'  => 'POST',
+                'header'  => array(
+                    'Content-type: application/vnd.api+json',
+                    'User-Agent: patreon-feed'
+                ),
+                'content' => $postdata
+            )
+        );
+
+        $context = stream_context_create($opts);
+        // TODO move URL to constant
+        $handle= fopen("https://www.patreon.com/api/login?json-api-version=1.0", "rb", false, $context);
+
+        stream_get_contents($handle); // consume body
+
+        $metadata = stream_get_meta_data($handle);
+
+        fclose($handle);
+
+        $prefix = "Set-Cookie: session_id=";
+        $prefix_len = strlen($prefix);
+
+        foreach($metadata["wrapper_data"] as $header)
+        {
+            if(substr($header, 0, $prefix_len) === $prefix)
+            {
+                $this->setSessionId(substr($header, $prefix_len, strpos($header, ";") - $prefix_len));
+                break;
+            }
+        }
+
+    }
+
+    /**
      * Print a single post as RSS item
      *
      * @param array $item
