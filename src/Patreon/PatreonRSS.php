@@ -61,8 +61,8 @@ class PatreonRSS
 
     /** @var array haven't really played with those, except the creator id */
     protected $filter = array(
-        // Keys, see #setCreatorId
-        // 'is_following'
+        'is_following' => true,
+        // other keys, see #setCreatorId
         // 'is_by_creator'
         // 'creator_id'
         // 'contains_exclusive_posts'
