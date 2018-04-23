@@ -99,6 +99,11 @@ class PatreonRSS
         return $this;
     }
 
+    public function setSessionId($session_id)
+    {
+        $this->session_id=$session_id;
+    }
+
     /**
      * Output the RSS directly to the browser
      */
