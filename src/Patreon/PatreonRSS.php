@@ -8,6 +8,7 @@
 
 namespace daemionfox\Patreon;
 
+use daemionfox\Patreon\Components\User;
 
 /**
  * Class PatreonRSS
@@ -70,6 +71,9 @@ class PatreonRSS
 
     /** @var string|null which contains the session key for this user, if available, otherwise null. */
     protected $session_id = null;
+
+    /** @var string|null the user of the private feed, if applicable, otherwise null. */
+    protected $user = null;
 
     /**
      * PatreonRSS constructor.
@@ -208,9 +212,6 @@ class PatreonRSS
         else
         {
             // Set minimal values for #printRssChannelInfo
-            $clean['user'] = array(
-                'url' => 'https://www.patreon.com/home'
-            );
             $clean['campaign'] = array(
                 'creation_name' => 'Your', // "Your" instead of "[Creator]" in "[Creator] Patreon Posts"
                 'campaign_description' => ''
@@ -285,11 +286,16 @@ class PatreonRSS
         // TODO move URL to constant
         $handle= fopen("https://www.patreon.com/api/login?json-api-version=1.0", "rb", false, $context);
 
-        stream_get_contents($handle); // consume body
-
+        $profile = json_decode(stream_get_contents($handle), true)['data'];
         $metadata = stream_get_meta_data($handle);
 
         fclose($handle);
+
+        $user_data = $profile['attributes'];
+        $user_data['id'] = $profile['id'];
+
+        $this->user = new User();
+        $this->user->load($user_data);
 
         $prefix = "Set-Cookie: session_id=";
         $prefix_len = strlen($prefix);
