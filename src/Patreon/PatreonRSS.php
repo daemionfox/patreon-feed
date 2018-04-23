@@ -8,6 +8,7 @@
 
 namespace daemionfox\Patreon;
 
+use daemionfox\Patreon\Components\User;
 
 /**
  * Class PatreonRSS
@@ -70,6 +71,9 @@ class PatreonRSS
 
     /** @var string|null which contains the session key for this user, if available, otherwise null. */
     protected $session_id = null;
+
+    /** @var string|null the user of the private feed, if applicable, otherwise null. */
+    protected $user = null;
 
     /**
      * PatreonRSS constructor.
@@ -186,19 +190,32 @@ class PatreonRSS
             'user' => array(),
             'campaign' => array()
         );
+
         foreach ($data['data'] as $item) {
             $clean['posts'][] = $item['attributes'];
         }
-        foreach ($data['included'] as $item) {
-            if ($item['type'] == 'user') {
-                $clean['user'] = $item['attributes'];
-                $clean['user']['id'] = $item['id'];
-                continue;
+
+        if($this->session_id == null) // User and campaign do not make sense for personal feed
+        {
+            foreach ($data['included'] as $item) {
+                if ($item['type'] == 'user') {
+                    $clean['user'] = $item['attributes'];
+                    $clean['user']['id'] = $item['id'];
+                    continue;
+                }
+                if ($item['type'] == 'campaign') {
+                    $clean['campaign'] = $item['attributes'];
+                    $clean['campaign']['id'] = $item['id'];
+                }
             }
-            if ($item['type'] == 'campaign') {
-                $clean['campaign'] = $item['attributes'];
-                $clean['campaign']['id'] = $item['id'];
-            }
+        }
+        else
+        {
+            // Set minimal values for #printRssChannelInfo
+            $clean['campaign'] = array(
+                'creation_name' => 'Your', // "Your" instead of "[Creator]" in "[Creator] Patreon Posts"
+                'campaign_description' => ''
+            );
         }
 
         return $clean;
@@ -213,8 +230,9 @@ class PatreonRSS
         if($this->session_id == null) // No session key, no cookies required
         {
             return file_get_contents($url);
-        } else {
-
+        }
+        else
+        {
             $opts = array('http' =>
                 array(
                     'header'  => array(
@@ -268,11 +286,16 @@ class PatreonRSS
         // TODO move URL to constant
         $handle= fopen("https://www.patreon.com/api/login?json-api-version=1.0", "rb", false, $context);
 
-        stream_get_contents($handle); // consume body
-
+        $profile = json_decode(stream_get_contents($handle), true)['data'];
         $metadata = stream_get_meta_data($handle);
 
         fclose($handle);
+
+        $user_data = $profile['attributes'];
+        $user_data['id'] = $profile['id'];
+
+        $this->user = new User();
+        $this->user->load($user_data);
 
         $prefix = "Set-Cookie: session_id=";
         $prefix_len = strlen($prefix);

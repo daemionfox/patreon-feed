@@ -45,11 +45,6 @@ class Feed extends PatreonRSS
     protected $posts;
 
     /**
-     * @var User
-     */
-    protected $user;
-
-    /**
      * @var Campaign
      */
     protected $campaign;
@@ -94,12 +89,23 @@ class Feed extends PatreonRSS
     /** @noinspection PhpMissingParentConstructorInspection */
     /**
      * Feed constructor.
+     * If password is given, treat creator name as login email.
      * @param null $creator
+     * @param null $password
      */
-    public function __construct($creator = null)
+    public function __construct($creator = null, $password = null)
     {
-        if ($creator !== null) {
-            $this->setCreator($creator);
+        if ($creator !== null)
+        {
+            if($password === null)
+            {
+                $this->setCreator($creator);
+            }
+            else
+            {
+                $this->login($creator, $password);
+                $this->getPatreon();
+            }
         }
     }
 
