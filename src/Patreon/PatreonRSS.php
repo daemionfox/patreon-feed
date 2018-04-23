@@ -213,8 +213,9 @@ class PatreonRSS
         if($this->session_id == null) // No session key, no cookies required
         {
             return file_get_contents($url);
-        } else {
-
+        }
+        else
+        {
             $opts = array('http' =>
                 array(
                     'header'  => array(
