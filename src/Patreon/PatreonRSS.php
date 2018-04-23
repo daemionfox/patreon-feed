@@ -186,19 +186,35 @@ class PatreonRSS
             'user' => array(),
             'campaign' => array()
         );
+
         foreach ($data['data'] as $item) {
             $clean['posts'][] = $item['attributes'];
         }
-        foreach ($data['included'] as $item) {
-            if ($item['type'] == 'user') {
-                $clean['user'] = $item['attributes'];
-                $clean['user']['id'] = $item['id'];
-                continue;
+
+        if($this->session_id == null) // User and campaign do not make sense for personal feed
+        {
+            foreach ($data['included'] as $item) {
+                if ($item['type'] == 'user') {
+                    $clean['user'] = $item['attributes'];
+                    $clean['user']['id'] = $item['id'];
+                    continue;
+                }
+                if ($item['type'] == 'campaign') {
+                    $clean['campaign'] = $item['attributes'];
+                    $clean['campaign']['id'] = $item['id'];
+                }
             }
-            if ($item['type'] == 'campaign') {
-                $clean['campaign'] = $item['attributes'];
-                $clean['campaign']['id'] = $item['id'];
-            }
+        }
+        else
+        {
+            // Set minimal values for #printRssChannelInfo
+            $clean['user'] = array(
+                'url' => 'https://www.patreon.com/home'
+            );
+            $clean['campaign'] = array(
+                'creation_name' => 'Your', // "Your" instead of "[Creator]" in "[Creator] Patreon Posts"
+                'campaign_description' => ''
+            );
         }
 
         return $clean;
