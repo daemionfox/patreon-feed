@@ -61,10 +61,11 @@ class PatreonRSS
 
     /** @var array haven't really played with those, except the creator id */
     protected $filter = array(
-        'is_by_creator' => true,
-        'is_following' => false,
-        'creator_id' => 'set by constructor',
-        'contains_exclusive_posts' => true
+        // Keys, see #setCreatorId
+        // 'is_following'
+        // 'is_by_creator'
+        // 'creator_id'
+        // 'contains_exclusive_posts'
     );
 
     /**
@@ -76,7 +77,7 @@ class PatreonRSS
     public function __construct($id = null)
     {
         if (!empty($id)) {
-            $this->filter['creator_id'] = $id;
+            $this->setCreatorID($id);
         }
     }
 
@@ -86,7 +87,12 @@ class PatreonRSS
      */
     public function setCreatorID($id)
     {
-        $this->filter['creator_id'] = $id;
+        $this->filter = array_merge($this->filter, array(
+            'is_by_creator' => true,
+            'is_following' => false,
+            'creator_id' => $id,
+            'contains_exclusive_posts' => true
+        ));
         return $this;
     }
 
