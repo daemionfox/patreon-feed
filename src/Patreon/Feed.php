@@ -45,11 +45,6 @@ class Feed extends PatreonRSS
     protected $posts;
 
     /**
-     * @var User
-     */
-    protected $user;
-
-    /**
      * @var Campaign
      */
     protected $campaign;
