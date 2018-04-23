@@ -32,6 +32,14 @@ $rss = $patreon->rss();
 echo $rss;
 ```
 
+
+```php
+// Login to access your private feed.
+$patreon = new \daemionfox\Patreon\Feed("user@example.com", "1n53cur3");
+$rss = $patreon->rss();
+echo $rss;
+```
+
 ### Caching
 
 Feed has the ability to set a cache path and turn on caching via static methods.
