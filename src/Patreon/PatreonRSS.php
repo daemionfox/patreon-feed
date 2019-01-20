@@ -8,6 +8,7 @@
 
 namespace daemionfox\Patreon;
 
+use daemionfox\Patreon\Components\User;
 
 /**
  * Class PatreonRSS
@@ -61,11 +62,18 @@ class PatreonRSS
 
     /** @var array haven't really played with those, except the creator id */
     protected $filter = array(
-        'is_by_creator' => true,
-        'is_following' => false,
-        'creator_id' => 'set by constructor',
-        'contains_exclusive_posts' => true
+        'is_following' => true,
+        // other keys, see #setCreatorId
+        // 'is_by_creator'
+        // 'creator_id'
+        // 'contains_exclusive_posts'
     );
+
+    /** @var string|null which contains the session key for this user, if available, otherwise null. */
+    protected $session_id = null;
+
+    /** @var string|null the user of the private feed, if applicable, otherwise null. */
+    protected $user = null;
 
     /**
      * PatreonRSS constructor.
@@ -76,7 +84,7 @@ class PatreonRSS
     public function __construct($id = null)
     {
         if (!empty($id)) {
-            $this->filter['creator_id'] = $id;
+            $this->setCreatorID($id);
         }
     }
 
@@ -86,8 +94,18 @@ class PatreonRSS
      */
     public function setCreatorID($id)
     {
-        $this->filter['creator_id'] = $id;
+        $this->filter = array_merge($this->filter, array(
+            'is_by_creator' => true,
+            'is_following' => false,
+            'creator_id' => $id,
+            'contains_exclusive_posts' => true
+        ));
         return $this;
+    }
+
+    public function setSessionId($session_id)
+    {
+        $this->session_id=$session_id;
     }
 
     /**
@@ -164,7 +182,7 @@ class PatreonRSS
     public function getData()
     {
         $url = $this->getURL();
-        $json = file_get_contents($url);
+        $json = $this->getStream($url);
         $data = json_decode($json, true);
 
         $clean = array(
@@ -172,22 +190,125 @@ class PatreonRSS
             'user' => array(),
             'campaign' => array()
         );
+
         foreach ($data['data'] as $item) {
             $clean['posts'][] = $item['attributes'];
         }
-        foreach ($data['included'] as $item) {
-            if ($item['type'] == 'user') {
-                $clean['user'] = $item['attributes'];
-                $clean['user']['id'] = $item['id'];
-                continue;
+
+        if($this->session_id == null) // User and campaign do not make sense for personal feed
+        {
+            foreach ($data['included'] as $item) {
+                if ($item['type'] == 'user') {
+                    $clean['user'] = $item['attributes'];
+                    $clean['user']['id'] = $item['id'];
+                    continue;
+                }
+                if ($item['type'] == 'campaign') {
+                    $clean['campaign'] = $item['attributes'];
+                    $clean['campaign']['id'] = $item['id'];
+                }
             }
-            if ($item['type'] == 'campaign') {
-                $clean['campaign'] = $item['attributes'];
-                $clean['campaign']['id'] = $item['id'];
-            }
+        }
+        else
+        {
+            // Set minimal values for #printRssChannelInfo
+            $clean['campaign'] = array(
+                'creation_name' => 'Your', // "Your" instead of "[Creator]" in "[Creator] Patreon Posts"
+                'campaign_description' => ''
+            );
         }
 
         return $clean;
+    }
+
+    /**
+     * Obtains the stream JSON
+     * @return string
+     */
+    private function getStream($url)
+    {
+        if($this->session_id == null) // No session key, no cookies required
+        {
+            return file_get_contents($url);
+        }
+        else
+        {
+            $opts = array('http' =>
+                array(
+                    'header'  => array(
+                        "Cookie: session_id={$this->session_id}"
+                    )
+                )
+            );
+
+            $context = stream_context_create($opts);
+            $handle = fopen($url, "rb", false, $context);
+
+            $contents = stream_get_contents($handle);
+            fclose($handle);
+
+            return $contents;
+        }
+    }
+
+    /**
+     * Log-In to Patreon to obtain session key
+     * @param $mail string
+     * @param $pass string
+     * @return string|null the session key or null if no credentials have been provided.
+     */
+    public function login($mail, $pass) {
+
+        $postdata = json_encode(
+            array(
+                'data' => array(
+                    'type' => 'user',
+                    'attributes' => array(
+                        'email' => $mail,
+                        'password' => $pass
+                    )
+                )
+            )
+        );
+
+        $opts = array('http' =>
+            array(
+                'method'  => 'POST',
+                'header'  => array(
+                    'Content-type: application/vnd.api+json',
+                    'User-Agent: patreon-feed'
+                ),
+                'content' => $postdata
+            )
+        );
+
+        $context = stream_context_create($opts);
+        // TODO move URL to constant
+        $handle= fopen("https://www.patreon.com/api/login?json-api-version=1.0", "rb", false, $context);
+
+        $profile = json_decode(stream_get_contents($handle), true)['data'];
+        $metadata = stream_get_meta_data($handle);
+
+        fclose($handle);
+
+        $user_data = $profile['attributes'];
+        $user_data['id'] = $profile['id'];
+
+        $this->user = new User();
+        $this->user->load($user_data);
+
+        $prefix = "Set-Cookie: session_id=";
+        $prefix_len = strlen($prefix);
+
+        foreach($metadata["wrapper_data"] as $header)
+        {
+            if(substr($header, 0, $prefix_len) === $prefix)
+            {
+                $this->setSessionId(substr($header, $prefix_len, strpos($header, ";") - $prefix_len));
+                return $this->session_id;
+            }
+        }
+
     }
 
     /**

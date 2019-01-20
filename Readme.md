@@ -26,8 +26,16 @@ print_r($camp);
 ```
 
 ```php
-// Get rss feed 
+// Get RSS feed
 $patreon = new \daemionfox\Patreon\Feed("SomeCreator");
+$rss = $patreon->rss();
+echo $rss;
+```
+
+
+```php
+// Login to access your private feed.
+$patreon = new \daemionfox\Patreon\Feed("user@example.com", "1n53cur3");
 $rss = $patreon->rss();
 echo $rss;
 ```
@@ -36,15 +44,17 @@ echo $rss;
 
 Feed has the ability to set a cache path and turn on caching via static methods.
 
+```php
 Feed::setUseCache(true);
 Feed::setCachePath('/path/to/cache');
+```
 
 It will automatically attempt to save and load from cache if caching is set, and the cache timeout is 15 minutes.  
-By default, caching is off, and the cache path is set to /tmp
+By default, caching is off, and the cache path is set to `/tmp`
 
 ### Thanks to
 
-The inspiration and base code for this came from @splitbrain at: https://github.com/splitbrain/patreon-rss
+The inspiration and base code for this came from [@splitbrain](https://github.com/splitbrain) at [splitbrain/patreon-rss](https://github.com/splitbrain/patreon-rss)
 
 I've shamelessly lifted his code and included it as the base class for the Patreon/Feed class.
 
