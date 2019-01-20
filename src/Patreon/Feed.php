@@ -224,7 +224,9 @@ class Feed extends PatreonRSS
                     $post['published_at_calc'] = date('r', strtotime($post['published_at']));
                 }
 
-                if (empty($post['min_cents_pledged_to_view']) || intval($post['min_cents_pledged_to_view']) === 0) {
+                if (array_key_exists('min_cents_pledged_to_view', $post) && is_null($post['min_cents_pledged_to_view'])) {
+                    $post['pledge_level_calc'] = 'patreon';
+                } elseif (empty($post['min_cents_pledged_to_view']) || intval($post['min_cents_pledged_to_view']) === 0) {
                     $post['pledge_level_calc'] = 'public';
                 } elseif (intval($post['min_cents_pledged_to_view']) === 1) {
                     $post['pledge_level_calc'] = 'patreon';
