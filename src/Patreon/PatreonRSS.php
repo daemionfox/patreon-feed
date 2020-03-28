@@ -9,6 +9,7 @@
 namespace daemionfox\Patreon;
 
 use daemionfox\Patreon\Components\User;
+use mysql_xdevapi\Exception;
 
 /**
  * Class PatreonRSS
@@ -83,6 +84,7 @@ class PatreonRSS
      */
     public function __construct($id = null)
     {
+        throw new Exception("This class is deprecated, use PatreonFeed");
         if (!empty($id)) {
             $this->setCreatorID($id);
         }
