@@ -4,59 +4,66 @@
 
 ### Usage
 
+#### Caching
+
+To cache any of Campaigns, Posts or Members add this:
+
+```php
+\daemionfox\Patreon\API\Campaigns::setAllowCache(true); // Must be true to cache, default is false
+\daemionfox\Patreon\API\Campaigns::setCacheDir('/path/to/cache');  // Must be set, cache will fail if not set
+\daemionfox\Patreon\API\Campaigns::setCacheDir('numSeconds');  // default 14400 (4 hours)
+```
+
+To turn on caching across all things this will work:
+
+```php 
+\daemionfox\Patreon\API\APIAbstract::setAllowCache(true); // Must be true to cache, default is false
+\daemionfox\Patreon\API\APIAbstract::setCacheDir('/path/to/cache');  // Must be set, cache will fail if not set
+\daemionfox\Patreon\API\APIAbstract::setCacheDir('numSeconds');  // default 14400 (4 hours)
+```
+
+
+#### Data
+
+```php
+$creator_access_token = 'sometoken_gotten_from_patreon_api_auth';
+```
+
 ```php
 // Get Patreon posts
-$patreon = new \daemionfox\Patreon\Feed("SomeCreator");
+$patreon = \daemionfox\Patreon\API\Posts::init($creator_access_token);
 $posts = $patreon->getPosts();
 print_r($posts);
 ```
 
 ```php
-// Get Patreon user data
-$patreon = new \daemionfox\Patreon\Feed("SomeCreator");
-$user = $patreon->getUser();
-print_r($user);
+// Get Patreon campaign data
+$patreon = \daemionfox\Patreon\API\Campaigns::init($creator_access_token);
+$campaignID = $patreon->getCampaignID();
+$tiers = $patreon->getTiers();
+$goals = $patreon->getGoals();
 ```
 
 ```php
-// Get Patreon campaign data
-$patreon = new \daemionfox\Patreon\Feed("SomeCreator");
-$camp = $patreon->getCampaign();
-print_r($camp);
+// Get Patreon member data
+$patreon = \daemionfox\Patreon\API\Members::init($creator_access_token);
+$members = $patreon->getMembers();
+print_r($members);
 ```
 
 ```php
 // Get RSS feed
-$patreon = new \daemionfox\Patreon\Feed("SomeCreator");
+$patreon = new \daemionfox\Patreon\Feed($creator_access_token);
+
+// Optional:
+$patreon->setPostLimit(20); // Sets the number of posts returned in the feed.  Default 10
+$patreon->setShowPrivatePosts(true); // Decide if you want to show non-public posts in the feed
+
+// Return the feed
 $rss = $patreon->rss();
+
 echo $rss;
 ```
-
-
-```php
-// Login to access your private feed.
-$patreon = new \daemionfox\Patreon\Feed("user@example.com", "1n53cur3");
-$rss = $patreon->rss();
-echo $rss;
-```
-
-### Caching
-
-Feed has the ability to set a cache path and turn on caching via static methods.
-
-```php
-Feed::setUseCache(true);
-Feed::setCachePath('/path/to/cache');
-```
-
-It will automatically attempt to save and load from cache if caching is set, and the cache timeout is 15 minutes.  
-By default, caching is off, and the cache path is set to `/tmp`
-
-### Thanks to
-
-The inspiration and base code for this came from [@splitbrain](https://github.com/splitbrain) at [splitbrain/patreon-rss](https://github.com/splitbrain/patreon-rss)
-
-I've shamelessly lifted his code and included it as the base class for the Patreon/Feed class.
 
 
 ### Changelog
@@ -69,3 +76,6 @@ I've shamelessly lifted his code and included it as the base class for the Patre
  
 ###### 0.2.1
  * Updated readme, and moved cachePath to a static property
+
+###### 3.0
+ * Complete re-build from scratch using Patreon API to retrieve data
