@@ -8,7 +8,7 @@ use daemionfox\Exceptions\PatreonCacheException;
 
 trait CacheTrait
 {
-    protected static $alllowCache = false;
+    protected static $allowCache = false;
     protected static $cacheDir;
     protected static $cacheTimeout = 14400; // 4 hours
 
@@ -19,7 +19,7 @@ trait CacheTrait
      */
     protected function getCache($file)
     {
-        if (self::$alllowCache === true) {
+        if (self::$allowCache === true) {
             if (empty(self::$cacheDir)) {
                 throw new PatreonCacheException("Cache dir not set");
             }
@@ -59,7 +59,7 @@ trait CacheTrait
     protected function saveCache($file, $data)
     {
 
-        if (self::$alllowCache === true) {
+        if (self::$allowCache === true) {
             if(empty($file)) {
                 throw new PatreonCacheException("Cache file not set");
             }
@@ -78,11 +78,11 @@ trait CacheTrait
     }
 
     /**
-     * @param bool $alllowCache
+     * @param bool $allowCache
      */
-    public static function setAlllowCache(bool $allowCache): void
+    public static function setAllowCache(bool $allowCache): void
     {
-        self::$alllowCache = $allowCache;
+        self::$allowCache = $allowCache;
     }
 
     /**
