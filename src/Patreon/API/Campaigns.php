@@ -41,7 +41,7 @@ class Campaigns extends APIAbstract implements PatreonAPIInterface
             ;
             $campaign = $this->getAPIData($suffix);
 
-            $this->url = self::$patreonURL . "/" . $campaign['data']['attributes']['url'];
+            $this->url = stristr($campaign['data']['attributes']['url'], self::$patreonURL) !== false ? $campaign['data']['attributes']['url'] : self::$patreonURL . "/" . $campaign['data']['attributes']['url'];
             $this->name = $campaign['data']['attributes']['creation_name'];
             $this->summary = $campaign['data']['attributes']['summary'];
 
