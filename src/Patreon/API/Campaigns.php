@@ -37,7 +37,7 @@ class Campaigns extends APIAbstract implements PatreonAPIInterface
             $suffix = "campaigns/{$this->campaignID}?include=goals,tiers&" .
                 "fields%5Bcampaign%5D=creation_name,is_nsfw,summary,url,vanity&" .
                 "fields%5Btier%5D=amount_cents,title,patron_count,discord_role_ids&" .
-                "fields%5Bgoal%5D=amount_cents,completed_percentage,title,reached_at"
+                "fields%5Bgoal%5D=amount_cents,completed_percentage,title,reached_at,description"
             ;
             $campaign = $this->getAPIData($suffix);
 
@@ -64,7 +64,8 @@ class Campaigns extends APIAbstract implements PatreonAPIInterface
                             'amount' => $i['attributes']['amount_cents'],
                             'completed' => $i['attributes']['completed_percentage'],
                             'reached' => date('Y-m-d', strtotime($i['attributes']['reached_at'])),
-                            'title' => $i['attributes']['title']
+                            'title' => $i['attributes']['title'],
+                            'description' => $i['attributes']['description'],
                         ];
                         break;
                 }
