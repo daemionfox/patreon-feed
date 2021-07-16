@@ -35,7 +35,9 @@ class Members extends APIAbstract implements PatreonAPIInterface
             $this->campaignID = $campaign->getCampaignID();
             $this->tiers = $campaign->getTiers();
             $this->members = $this->fetchMembers();
-
+            if (empty($this->members)) {
+                $this->members = [];
+            }
             try {
                 $data = [
                     'campaignID' => $this->campaignID,
